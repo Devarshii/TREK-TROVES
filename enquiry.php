@@ -2,34 +2,31 @@
 session_start();
 error_reporting(0);
 include('includes/config.php');
-if(strlen($_SESSION['login'])==0)
-	{	
-header('location:index.php');
-}
-else{
-if(isset($_POST['submit5']))
-	{
-$password=md5($_POST['password']);
-$newpassword=md5($_POST['newpassword']);
-$email=$_SESSION['login'];
-	$sql ="SELECT Password FROM tblusers WHERE EmailId=:email and Password=:password";
-$query= $dbh -> prepare($sql);
-$query-> bindParam(':email', $email, PDO::PARAM_STR);
-$query-> bindParam(':password', $password, PDO::PARAM_STR);
-$query-> execute();
-$results = $query -> fetchAll(PDO::FETCH_OBJ);
-if($query -> rowCount() > 0)
+if(isset($_POST['submit1']))
 {
-$con="update tblusers set Password=:newpassword where EmailId=:email";
-$chngpwd1 = $dbh->prepare($con);
-$chngpwd1-> bindParam(':email', $email, PDO::PARAM_STR);
-$chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
-$chngpwd1->execute();
-$msg="Your Password succesfully changed";
+$fname=$_POST['fname'];
+$email=$_POST['email'];	
+$mobile=$_POST['mobileno'];
+$subject=$_POST['subject'];	
+$description=$_POST['description'];
+$sql="INSERT INTO  tblenquiry(FullName,EmailId,MobileNumber,Subject,Description) VALUES(:fname,:email,:mobile,:subject,:description)";
+$query = $dbh->prepare($sql);
+$query->bindParam(':fname',$fname,PDO::PARAM_STR);
+$query->bindParam(':email',$email,PDO::PARAM_STR);
+$query->bindParam(':mobile',$mobile,PDO::PARAM_STR);
+$query->bindParam(':subject',$subject,PDO::PARAM_STR);
+$query->bindParam(':description',$description,PDO::PARAM_STR);
+$query->execute();
+$lastInsertId = $dbh->lastInsertId();
+if($lastInsertId)
+{
+$msg="Enquiry  Successfully submited";
 }
-else {
-$error="Your current password is wrong";	
+else 
+{
+$error="Something went wrong. Please try again";
 }
+
 }
 
 ?>
@@ -56,18 +53,6 @@ $error="Your current password is wrong";
 	<script>
 		 new WOW().init();
 	</script>
-	<script type="text/javascript">
-function valid()
-{
-if(document.chngpwd.newpassword.value!= document.chngpwd.confirmpassword.value)
-{
-alert("New Password and Confirm Password Field do not match  !!");
-document.chngpwd.confirmpassword.focus();
-return false;
-}
-return true;
-}
-</script>
   <style>
 		.errorWrap {
     padding: 10px;
@@ -100,27 +85,31 @@ return true;
 <!--- privacy ---->
 <div class="privacy">
 	<div class="container">
-		<h3 class="wow fadeInDown animated animated" data-wow-delay=".5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInDown;">Change Password</h3>
-		<form name="chngpwd" method="post" onSubmit="return valid();">
+		<h3 class="wow fadeInDown animated animated" data-wow-delay=".5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInDown;">Enquiry Form Password</h3>
+		<form name="enquiry" method="post">
 		 <?php if($error){?><div class="errorWrap"><strong>ERROR</strong>:<?php echo htmlentities($error); ?> </div><?php } 
 				else if($msg){?><div class="succWrap"><strong>SUCCESS</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>
 	<p style="width: 350px;">
 		
-			<b>Current Password</b>  <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Current Password" required="">
+			<b>Full name</b>  <input type="text" name="fname" class="form-control" id="fname" placeholder="Full Name" required="">
+	</p> 
+<p style="width: 350px;">
+<b>Email</b>  <input type="email" name="email" class="form-control" id="email" placeholder="Valid Email id" required>
 	</p> 
 
-<p style="width: 350px;">
-<b>New  Password</b>
-<input type="password" class="form-control" name="newpassword" id="newpassword" placeholder="New Password" required="">
-</p>
+	<p style="width: 350px;">
+<b>Mobile No</b>  <input type="number" name="mobileno" min="1111111111" max="9999999999" class="form-control" id="mobileno" placeholder="10 Digit mobile No" required>
+	</p> 
 
-<p style="width: 350px;">
-<b>Confirm Password</b>
-	<input type="password" class="form-control" name="confirmpassword" id="confirmpassword" placeholder="Confrim Password" required="">
-			</p>
+	<p style="width: 350px;">
+<b>Subject</b>  <input type="text" name="subject" class="form-control" id="subject"  placeholder="Subject" required="">
+	</p> 
+	<p style="width: 350px;">
+<b>Description</b>  <textarea name="description" class="form-control" rows="6" cols="50" id="description"  placeholder="Description" required=""></textarea> 
+	</p> 
 
 			<p style="width: 350px;">
-<button type="submit" name="submit5" class="btn-primary btn">Change</button>
+<button type="submit" name="submit1" class="btn-primary btn">Submit</button>
 			</p>
 			</form>
 
@@ -141,4 +130,3 @@ return true;
 <?php include('includes/write-us.php');?>
 </body>
 </html>
-<?php } ?>

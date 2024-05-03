@@ -7,31 +7,6 @@ if(strlen($_SESSION['login'])==0)
 header('location:index.php');
 }
 else{
-if(isset($_POST['submit5']))
-	{
-$password=md5($_POST['password']);
-$newpassword=md5($_POST['newpassword']);
-$email=$_SESSION['login'];
-	$sql ="SELECT Password FROM tblusers WHERE EmailId=:email and Password=:password";
-$query= $dbh -> prepare($sql);
-$query-> bindParam(':email', $email, PDO::PARAM_STR);
-$query-> bindParam(':password', $password, PDO::PARAM_STR);
-$query-> execute();
-$results = $query -> fetchAll(PDO::FETCH_OBJ);
-if($query -> rowCount() > 0)
-{
-$con="update tblusers set Password=:newpassword where EmailId=:email";
-$chngpwd1 = $dbh->prepare($con);
-$chngpwd1-> bindParam(':email', $email, PDO::PARAM_STR);
-$chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
-$chngpwd1->execute();
-$msg="Your Password succesfully changed";
-}
-else {
-$error="Your current password is wrong";	
-}
-}
-
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -56,18 +31,7 @@ $error="Your current password is wrong";
 	<script>
 		 new WOW().init();
 	</script>
-	<script type="text/javascript">
-function valid()
-{
-if(document.chngpwd.newpassword.value!= document.chngpwd.confirmpassword.value)
-{
-alert("New Password and Confirm Password Field do not match  !!");
-document.chngpwd.confirmpassword.focus();
-return false;
-}
-return true;
-}
-</script>
+
   <style>
 		.errorWrap {
     padding: 10px;
@@ -100,27 +64,47 @@ return true;
 <!--- privacy ---->
 <div class="privacy">
 	<div class="container">
-		<h3 class="wow fadeInDown animated animated" data-wow-delay=".5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInDown;">Change Password</h3>
+		<h3 class="wow fadeInDown animated animated" data-wow-delay=".5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInDown;">Issue Tickets</h3>
 		<form name="chngpwd" method="post" onSubmit="return valid();">
 		 <?php if($error){?><div class="errorWrap"><strong>ERROR</strong>:<?php echo htmlentities($error); ?> </div><?php } 
 				else if($msg){?><div class="succWrap"><strong>SUCCESS</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>
-	<p style="width: 350px;">
+	<p>
+	<table border="1" width="100%">
+<tr align="center">
+<th>#</th>
+<th>Ticket Id</th>
+<th>Issue</th>	
+<th>Description</th>
+<th>Admin Remark</th>
+<th>Reg Date</th>
+<th>Remark date</th>
+
+</tr>
+<?php 
+
+$uemail=$_SESSION['login'];;
+$sql = "SELECT * from tblissues where UserEmail=:uemail";
+$query = $dbh->prepare($sql);
+$query -> bindParam(':uemail', $uemail, PDO::PARAM_STR);
+$query->execute();
+$results=$query->fetchAll(PDO::FETCH_OBJ);
+$cnt=1;
+if($query->rowCount() > 0)
+{
+foreach($results as $result)
+{	?>
+<tr align="center">
+<td ><?php echo htmlentities($cnt);?></td>
+<td width="100">#TKT-<?php echo htmlentities($result->id);?></td>
+<td><?php echo htmlentities($result->Issue);?></td>
+<td width="300"><?php echo htmlentities($result->Description);?></td>
+<td><?php echo htmlentities($result->AdminRemark);?></td>
+<td width="100"><?php echo htmlentities($result->PostingDate);?></td>
+<td width="100"><?php echo htmlentities($result->AdminremarkDate);?></td>
+</tr>
+<?php $cnt=$cnt+1; }} ?>
+	</table>
 		
-			<b>Current Password</b>  <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Current Password" required="">
-	</p> 
-
-<p style="width: 350px;">
-<b>New  Password</b>
-<input type="password" class="form-control" name="newpassword" id="newpassword" placeholder="New Password" required="">
-</p>
-
-<p style="width: 350px;">
-<b>Confirm Password</b>
-	<input type="password" class="form-control" name="confirmpassword" id="confirmpassword" placeholder="Confrim Password" required="">
-			</p>
-
-			<p style="width: 350px;">
-<button type="submit" name="submit5" class="btn-primary btn">Change</button>
 			</p>
 			</form>
 

@@ -7,29 +7,19 @@ if(strlen($_SESSION['login'])==0)
 header('location:index.php');
 }
 else{
-if(isset($_POST['submit5']))
+if(isset($_POST['submit6']))
 	{
-$password=md5($_POST['password']);
-$newpassword=md5($_POST['newpassword']);
+$name=$_POST['name'];
+$mobileno=$_POST['mobileno'];
 $email=$_SESSION['login'];
-	$sql ="SELECT Password FROM tblusers WHERE EmailId=:email and Password=:password";
-$query= $dbh -> prepare($sql);
-$query-> bindParam(':email', $email, PDO::PARAM_STR);
-$query-> bindParam(':password', $password, PDO::PARAM_STR);
-$query-> execute();
-$results = $query -> fetchAll(PDO::FETCH_OBJ);
-if($query -> rowCount() > 0)
-{
-$con="update tblusers set Password=:newpassword where EmailId=:email";
-$chngpwd1 = $dbh->prepare($con);
-$chngpwd1-> bindParam(':email', $email, PDO::PARAM_STR);
-$chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
-$chngpwd1->execute();
-$msg="Your Password succesfully changed";
-}
-else {
-$error="Your current password is wrong";	
-}
+
+$sql="update tblusers set FullName=:name,MobileNumber=:mobileno where EmailId=:email";
+$query = $dbh->prepare($sql);
+$query->bindParam(':name',$name,PDO::PARAM_STR);
+$query->bindParam(':mobileno',$mobileno,PDO::PARAM_STR);
+$query->bindParam(':email',$email,PDO::PARAM_STR);
+$query->execute();
+$msg="Profile Updated Successfully";
 }
 
 ?>
@@ -56,18 +46,7 @@ $error="Your current password is wrong";
 	<script>
 		 new WOW().init();
 	</script>
-	<script type="text/javascript">
-function valid()
-{
-if(document.chngpwd.newpassword.value!= document.chngpwd.confirmpassword.value)
-{
-alert("New Password and Confirm Password Field do not match  !!");
-document.chngpwd.confirmpassword.focus();
-return false;
-}
-return true;
-}
-</script>
+
   <style>
 		.errorWrap {
     padding: 10px;
@@ -100,27 +79,51 @@ return true;
 <!--- privacy ---->
 <div class="privacy">
 	<div class="container">
-		<h3 class="wow fadeInDown animated animated" data-wow-delay=".5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInDown;">Change Password</h3>
-		<form name="chngpwd" method="post" onSubmit="return valid();">
+		<h3 class="wow fadeInDown animated animated" data-wow-delay=".5s" style="visibility: visible; animation-delay: 0.5s; animation-name: fadeInDown;">My Profile</h3>
+		<form name="chngpwd" method="post">
 		 <?php if($error){?><div class="errorWrap"><strong>ERROR</strong>:<?php echo htmlentities($error); ?> </div><?php } 
 				else if($msg){?><div class="succWrap"><strong>SUCCESS</strong>:<?php echo htmlentities($msg); ?> </div><?php }?>
+
+<?php 
+$useremail=$_SESSION['login'];
+$sql = "SELECT * from tblusers where EmailId=:useremail";
+$query = $dbh -> prepare($sql);
+$query -> bindParam(':useremail',$useremail, PDO::PARAM_STR);
+$query->execute();
+$results=$query->fetchAll(PDO::FETCH_OBJ);
+$cnt=1;
+if($query->rowCount() > 0)
+{
+foreach($results as $result)
+{	?>
+
 	<p style="width: 350px;">
 		
-			<b>Current Password</b>  <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Current Password" required="">
+			<b>Name</b>  <input type="text" name="name" value="<?php echo htmlentities($result->FullName);?>" class="form-control" id="name" required="">
 	</p> 
 
 <p style="width: 350px;">
-<b>New  Password</b>
-<input type="password" class="form-control" name="newpassword" id="newpassword" placeholder="New Password" required="">
+<b>Mobile Number</b>
+<input type="text" class="form-control" name="mobileno" maxlength="10" value="<?php echo htmlentities($result->MobileNumber);?>" id="mobileno"  required="">
 </p>
 
 <p style="width: 350px;">
-<b>Confirm Password</b>
-	<input type="password" class="form-control" name="confirmpassword" id="confirmpassword" placeholder="Confrim Password" required="">
+<b>Email Id</b>
+	<input type="email" class="form-control" name="email" value="<?php echo htmlentities($result->EmailId);?>" id="email" readonly>
 			</p>
+<p style="width: 350px;">
+<b>Last Updation Date : </b>
+<?php echo htmlentities($result->UpdationDate);?>
+</p>
+
+<p style="width: 350px;">	
+<b>Reg Date :</b>
+<?php echo htmlentities($result->RegDate);?>
+			</p>
+<?php }} ?>
 
 			<p style="width: 350px;">
-<button type="submit" name="submit5" class="btn-primary btn">Change</button>
+<button type="submit" name="submit6" class="btn-primary btn">Update</button>
 			</p>
 			</form>
 
